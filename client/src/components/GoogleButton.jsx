@@ -6,12 +6,7 @@ import { isFirebaseConfigured, friendlyAuthError } from '../lib/firebase';
 export default function GoogleButton({ label = 'Continue with Google' }) {
   const { loginWithGoogle } = useAuth();
   const navigate = useNavigate();
-  // An error from a redirect-based sign-in is stashed before navigation.
-  const [err, setErr] = useState(() => {
-    const pending = sessionStorage.getItem('skillswap_auth_error');
-    if (pending) sessionStorage.removeItem('skillswap_auth_error');
-    return pending || '';
-  });
+  const [err, setErr] = useState('');
   const [busy, setBusy] = useState(false);
 
   async function go() {
@@ -19,15 +14,11 @@ export default function GoogleButton({ label = 'Continue with Google' }) {
     setBusy(true);
     try {
       const u = await loginWithGoogle();
-      if (u) {
-        navigate(u.role === 'admin' ? '/admin' : '/dashboard');
-        setBusy(false);
-      }
-      // u === null means a redirect is in progress; keep the button busy
-      // until the browser leaves the page and comes back with the result.
+      navigate(u.role === 'admin' ? '/admin' : '/dashboard');
     } catch (e) {
       console.warn('[SkillSwap] Google sign-in failed:', e?.code || '', e);
       setErr(friendlyAuthError(e));
+    } finally {
       setBusy(false);
     }
   }
