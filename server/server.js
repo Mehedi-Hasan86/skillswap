@@ -72,15 +72,20 @@ const ready = (async () => {
         console.log('Seeded skills to MongoDB');
       }
       const User = require('./models/User');
-      const adminExists = await User.findOne({ email: 'admin@skillswap.local' });
-      if (!adminExists) {
-        const bcrypt = require('bcryptjs');
-        await User.create({
-          name: 'Admin', email: 'admin@skillswap.local',
-          passwordHash: await bcrypt.hash('admin123', 10), role: 'admin', credits: 100,
-        });
-        console.log('Seeded admin to MongoDB (admin@skillswap.local / admin123)');
+      // Seed every demo account (admin + students) into Mongo, not just the
+      // admin. The login page advertises rahim@student.local / student123, so
+      // those users must exist in Mongo mode too — otherwise the demo buttons
+      // return "Invalid credentials" as soon as the database connects.
+      for (const u of store.users) {
+        const { _id, createdAt, ...data } = u; // let Mongo assign _id/timestamps
+        try {
+          await User.updateOne({ email: data.email }, { $setOnInsert: data }, { upsert: true });
+        } catch (e) {
+          // Concurrent Vercel instances may insert the same demo user at once.
+          if (e.code !== 11000) throw e;
+        }
       }
+      console.log(`Seeded ${store.users.length} demo users to MongoDB`);
     } catch (e) {
       console.warn('Mongo seed skipped:', e.message);
     }
