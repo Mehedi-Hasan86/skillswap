@@ -5,6 +5,7 @@ import {
   signInWithPopup,
   signInWithRedirect,
   getRedirectResult,
+  onAuthStateChanged,
 } from 'firebase/auth';
 
 // Web config from Firebase Console → Project settings → General → Your apps.
@@ -60,9 +61,13 @@ export async function signInWithGoogle() {
     // browser channel and usually succeeds where the popup cannot.
     if (isNetworkError(e) || isPopupProblem(e)) {
       try {
+        // Remember that we left the page so that, on return, the app knows to
+        // restore the app session even if getRedirectResult() comes back null.
+        sessionStorage.setItem('skillswap_google_redirect', '1');
         await signInWithRedirect(auth, googleProvider);
         return { redirecting: true };
       } catch {
+        sessionStorage.removeItem('skillswap_google_redirect');
         throw e; // surface the original popup error if redirect won't start
       }
     }
@@ -77,9 +82,31 @@ export async function resumeGoogleSignIn() {
   try {
     const result = await getRedirectResult(auth);
     return result ? await result.user.getIdToken() : null;
-  } catch {
+  } catch (e) {
+    // getRedirectResult() can throw (e.g. auth/redirect-cancelled-by-user or a
+    // storage error). Don't swallow it silently — the auth-state fallback in
+    // AuthContext still restores the session, but the reason should be visible.
+    console.warn('[SkillSwap] getRedirectResult failed:', e?.code || '', e);
     return null;
   }
+}
+
+// True when we navigated away for a redirect-based Google sign-in and this is
+// the page load that came back from Google.
+export function isReturningFromGoogleRedirect() {
+  return sessionStorage.getItem('skillswap_google_redirect') === '1';
+}
+
+export function clearGoogleRedirectFlag() {
+  sessionStorage.removeItem('skillswap_google_redirect');
+}
+
+// Fires when Firebase restores/creates a user (including the redirect user
+// restored from persistence). Used as a fallback when getRedirectResult() does
+// not hand back a result. Returns an unsubscribe function.
+export function onFirebaseAuthChanged(cb) {
+  if (!isFirebaseConfigured) return () => {};
+  return onAuthStateChanged(auth, cb);
 }
 
 // Translate Firebase / Axios errors into messages a student can act on.

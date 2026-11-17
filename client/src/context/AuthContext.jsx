@@ -1,6 +1,13 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import api from '../lib/api';
-import { signInWithGoogle, resumeGoogleSignIn, friendlyAuthError } from '../lib/firebase';
+import {
+  signInWithGoogle,
+  resumeGoogleSignIn,
+  friendlyAuthError,
+  onFirebaseAuthChanged,
+  isReturningFromGoogleRedirect,
+  clearGoogleRedirectFlag,
+} from '../lib/firebase';
 
 const AuthContext = createContext(null);
 
@@ -25,26 +32,65 @@ export function AuthProvider({ children }) {
     }
   }
 
+  async function exchangeFirebaseToken(idToken) {
+    const { data } = await api.post('/auth/google', { idToken });
+    localStorage.setItem('skillswap_token', data.token);
+    setUser(data.user);
+    return data.user;
+  }
+
+  function finishGoogleSignIn(u) {
+    clearGoogleRedirectFlag();
+    sessionStorage.removeItem('skillswap_auth_error');
+    // AuthProvider sits outside BrowserRouter, so a full navigation is used.
+    window.location.replace(u.role === 'admin' ? '/admin' : '/dashboard');
+  }
+
   useEffect(() => {
+    let cancelled = false;
+    let unsubscribe = () => {};
+    const returningFromRedirect = isReturningFromGoogleRedirect();
+
     (async () => {
-      // Finish a Google sign-in that used the redirect fallback (popup blocked).
-      // getRedirectResult() is safe to call on every mount (React StrictMode
-      // mounts twice in dev) — Firebase returns the cached result.
+      // 1. Normal redirect path: getRedirectResult() hands back the credential.
       try {
         const idToken = await resumeGoogleSignIn();
         if (idToken) {
-          const { data } = await api.post('/auth/google', { idToken });
-          localStorage.setItem('skillswap_token', data.token);
-          setUser(data.user);
-          window.location.replace(data.user.role === 'admin' ? '/admin' : '/dashboard');
+          const u = await exchangeFirebaseToken(idToken);
+          if (!cancelled) finishGoogleSignIn(u);
           return;
         }
       } catch (e) {
         // Show the failure on the login page once we get back (no router here).
         sessionStorage.setItem('skillswap_auth_error', friendlyAuthError(e));
       }
+
+      // 2. Fallback: getRedirectResult() sometimes returns null (or throws)
+      // even though Firebase restored the signed-in Google user from
+      // persistence. onAuthStateChanged fires reliably in that case — without
+      // it the app just sat on /login after a successful redirect sign-in.
+      if (returningFromRedirect && !cancelled) {
+        unsubscribe = onFirebaseAuthChanged(async (fbUser) => {
+          if (!fbUser || cancelled) return;
+          unsubscribe();
+          try {
+            const idToken = await fbUser.getIdToken();
+            const u = await exchangeFirebaseToken(idToken);
+            if (!cancelled) finishGoogleSignIn(u);
+          } catch (e) {
+            clearGoogleRedirectFlag();
+            sessionStorage.setItem('skillswap_auth_error', friendlyAuthError(e));
+          }
+        });
+      }
+
       await fetchMe();
     })();
+
+    return () => {
+      cancelled = true;
+      unsubscribe();
+    };
   }, []);
 
   async function login(email, password) {
