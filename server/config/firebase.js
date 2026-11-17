@@ -23,17 +23,18 @@ function getAdmin() {
     // Render/compose envs often escape newlines as \n — restore them.
     privateKey = privateKey.replace(/\\n/g, '\n').trim();
 
-    const adminLib = require('firebase-admin');
+    // Use the modular `firebase-admin/app` entry point — it works on both
+    // v13 and v14. Pinning v13 avoids jwks-rsa's ESM-only `jose` dependency,
+    // which breaks token verification on Vercel's Node runtime.
+    const { getApps, initializeApp, cert } = require('firebase-admin/app');
 
-    // firebase-admin v14 removed the legacy `admin.apps` array.
-    // `getApps()` is the supported way to check for an existing app.
-    if (adminLib.getApps().length === 0) {
-      adminLib.initializeApp({
-        credential: adminLib.cert({ projectId, clientEmail, privateKey }),
+    if (getApps().length === 0) {
+      initializeApp({
+        credential: cert({ projectId, clientEmail, privateKey }),
       });
     }
 
-    admin = adminLib;
+    admin = require('firebase-admin');
     return admin;
   } catch (e) {
     // Keep the reason available to /api/auth/google instead of surfacing a
