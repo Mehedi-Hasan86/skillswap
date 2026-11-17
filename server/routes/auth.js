@@ -112,6 +112,7 @@ router.post('/google', async (req, res) => {
     try {
       decoded = await verifyIdToken(idToken);
     } catch (e) {
+      console.error('[auth/google] Firebase token verification failed:', e.code || '', e.message || e);
       const configProblem = /not configured|initialization failed/i.test(e.message || '');
       const msg = configProblem
         ? 'Google sign-in is unavailable on the server (Firebase Admin is not configured correctly)'
