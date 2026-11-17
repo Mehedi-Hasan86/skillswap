@@ -30,26 +30,45 @@ async function authRequired(req, res, next) {
   const header = req.headers.authorization || '';
   const token = header.startsWith('Bearer ') ? header.slice(7) : null;
   if (!token) return res.status(401).json({ error: 'No token provided' });
+
+  // 1. Verify the token. ONLY a signature/expiry failure is "Invalid token".
+  let payload;
   try {
-    const payload = jwt.verify(token, JWT_SECRET);
-    let user = await findUserById(payload.id);
-    if (!user && payload.snapshot) {
-      // Different Vercel lambda instance (or process restart) — fall back to
-      // the signed snapshot and rehydrate it locally so the session survives.
+    payload = jwt.verify(token, JWT_SECRET);
+  } catch (e) {
+    return res.status(401).json({ error: 'Invalid token' });
+  }
+
+  // 2. Resolve the user, tolerating DB failures. On Vercel each serverless
+  // instance has its own in-memory store and a transient MongoDB hiccup can
+  // make findUserById throw. Per NFR5 (stateless REST), a valid token must
+  // restore the session regardless of which instance handles it — so a failed
+  // lookup falls back to the signed snapshot instead of 401-ing the user.
+  let user = null;
+  let dbLookupFailed = false;
+  try {
+    user = await findUserById(payload.id);
+  } catch (e) {
+    dbLookupFailed = true;
+    console.warn('[SkillSwap] DB lookup failed, using signed snapshot:', e.message);
+  }
+  if (!user && payload.snapshot) {
+    // Only rehydrate from the snapshot when the DB could not prove the user
+    // is gone (cold instance / DB error). If MongoDB is connected and simply
+    // returned null, the user was really deleted — do not resurrect them.
+    if (dbLookupFailed || !dbConnected()) {
       user = { ...payload.snapshot, _id: payload.snapshot._id || payload.id };
       if (!dbConnected() && !store.users.some((u) => String(u._id) === String(user._id))) {
         store.users.push({ ...user, passwordHash: '' });
       }
     }
-    if (!user) return res.status(401).json({ error: 'User not found' });
-    const plain = user.toObject ? user.toObject() : user;
-    if (plain.status === 'suspended') return res.status(403).json({ error: 'Account suspended' });
-    req.user = plain;
-    req.userDoc = user;
-    next();
-  } catch (e) {
-    return res.status(401).json({ error: 'Invalid token' });
   }
+  if (!user) return res.status(401).json({ error: 'User not found' });
+  const plain = user.toObject ? user.toObject() : user;
+  if (plain.status === 'suspended') return res.status(403).json({ error: 'Account suspended' });
+  req.user = plain;
+  req.userDoc = user;
+  next();
 }
 
 function adminOnly(req, res, next) {
