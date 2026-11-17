@@ -7,7 +7,20 @@ const { store, id, seedIfEmpty } = require('./utils/store');
 const { seedMemory } = require('./seed');
 
 const app = express();
-app.use(cors({ origin: process.env.CLIENT_URL?.split(',') || true }));
+// Accept localhost and 127.0.0.1 (Vite binds to all interfaces) and any
+// origin during local development, so a CORS mismatch never looks like a
+// "Network Error" during Google sign-in.
+const allowedOrigins = (process.env.CLIENT_URL || 'http://localhost:3000,http://127.0.0.1:3000')
+  .split(',')
+  .map((o) => o.trim());
+app.use(cors({
+  origin: (origin, cb) => {
+    if (!origin || allowedOrigins.includes(origin) || process.env.NODE_ENV !== 'production') {
+      return cb(null, true);
+    }
+    return cb(new Error('Not allowed by CORS'));
+  },
+}));
 app.use(express.json());
 
 // public

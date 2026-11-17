@@ -149,8 +149,10 @@ Email/password authentication works instantly out of the box. To enable **Google
    FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
    ```
 
-   ⚠️ **Troubleshooting `auth/unauthorized-domain`:**
-   If Google Sign-In throws an unauthorized domain error, go to **Firebase Console → Authentication → Settings → Authorized domains** and click **Add Domain** to add `localhost` and `127.0.0.1`.
+   #### Troubleshooting Google Sign-In
+   * **`auth/network-request-failed` / "Could not reach Google Sign-In":** The client retries once automatically; if it still fails, check your internet connection (Firebase Auth talks to `identitytoolkit.googleapis.com`). Email/password login keeps working offline. If you edited `client/.env`, **restart `npm run dev`** — Vite reads `VITE_*` values only at startup.
+   * **`auth/unauthorized-domain`:** Go to **Firebase Console → Authentication → Settings → Authorized domains** and add `localhost` and `127.0.0.1` (and the exact host/port you open the app on).
+   * **"Google sign-in is unavailable on the server" (HTTP 503):** Check the `FIREBASE_*` values in `server/.env`. Keep `\n` escapes in `FIREBASE_PRIVATE_KEY` as-is — the server converts them to real newlines. `firebase-admin` v14+ is used (`getApps()` and `firebase-admin/auth`).
 
 ---
 

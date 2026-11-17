@@ -9,7 +9,9 @@ async function connectDB() {
     return false;
   }
   try {
-    await mongoose.connect(uri);
+    // Fail fast so the app falls back to in-memory mode instead of leaving
+    // the frontend waiting ~30s for a MongoDB that may not be running.
+    await mongoose.connect(uri, { serverSelectionTimeoutMS: 2000 });
     isConnected = true;
     console.log('MongoDB connected');
     return true;

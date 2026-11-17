@@ -112,10 +112,11 @@ router.post('/google', async (req, res) => {
     try {
       decoded = await verifyIdToken(idToken);
     } catch (e) {
-      const msg = /not configured/i.test(e.message)
-        ? 'Google sign-in is not configured on the server (missing Firebase Admin credentials)'
+      const configProblem = /not configured|initialization failed/i.test(e.message || '');
+      const msg = configProblem
+        ? 'Google sign-in is unavailable on the server (Firebase Admin is not configured correctly)'
         : 'Invalid Google token';
-      const code = /not configured/i.test(e.message) ? 503 : 401;
+      const code = configProblem ? 503 : 401;
       return res.status(code).json({ error: msg });
     }
 

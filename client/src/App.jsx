@@ -1,19 +1,39 @@
-import { useState, useEffect } from 'react'
-import axios from 'axios'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider } from './context/AuthContext';
+import ProtectedRoute from './components/ProtectedRoute';
+import Landing from './pages/Landing';
+import Login from './pages/Login';
+import Register from './pages/Register';
+import Dashboard from './pages/Dashboard';
+import Admin from './pages/Admin';
 
-function App() {
-  const [status, setStatus] = useState('Loading...')
-
-  useEffect(() => {
-    axios.get('http://localhost:5000/api/health')
-    .then(res => setStatus(res.data.status))
-    .catch(err => setStatus('Backend Off'))
-  }, [])
-
+export default function App() {
   return (
-    <div className="flex justify-center items-center h-screen">
-      <h1 className="text-3xl font-bold">SkillSwap Backend: {status}</h1>
-    </div>
-  )
+    <AuthProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Landing />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute admin>
+                <Admin />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </BrowserRouter>
+    </AuthProvider>
+  );
 }
-export default App
