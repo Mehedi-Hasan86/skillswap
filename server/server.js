@@ -1,5 +1,4 @@
 const express = require('express');
-const cors = require('cors');
 require('dotenv').config();
 
 const { connectDB, dbConnected } = require('./config/db');
@@ -7,20 +6,34 @@ const { store, id, seedIfEmpty } = require('./utils/store');
 const { seedMemory } = require('./seed');
 
 const app = express();
-// Accept localhost and 127.0.0.1 (Vite binds to all interfaces) and any
-// origin during local development, so a CORS mismatch never looks like a
-// "Network Error" during Google sign-in.
+// CORS must allow the Vercel front-end. On Vercel the client and /api share a
+// host, but browsers still send an `Origin` header on POST/PUT requests, so a
+// strict allowlist breaks login with a generic 500. Allow same-origin, local
+// dev, explicitly configured CLIENT_URL entries, and Vercel preview/prod
+// domains.
 const allowedOrigins = (process.env.CLIENT_URL || 'http://localhost:3000,http://127.0.0.1:3000')
   .split(',')
   .map((o) => o.trim());
-app.use(cors({
-  origin: (origin, cb) => {
-    if (!origin || allowedOrigins.includes(origin) || process.env.NODE_ENV !== 'production') {
-      return cb(null, true);
-    }
-    return cb(new Error('Not allowed by CORS'));
-  },
-}));
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  if (!origin) return next();
+  let allowed = process.env.NODE_ENV !== 'production' || allowedOrigins.includes(origin);
+  if (!allowed) {
+    try {
+      const u = new URL(origin);
+      const host = (req.headers.host || '').split(':')[0];
+      allowed = u.hostname === host || u.hostname.endsWith('.vercel.app');
+    } catch { /* malformed Origin — leave disallowed */ }
+  }
+  if (allowed) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+    res.setHeader('Vary', 'Origin');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
+  }
+  if (req.method === 'OPTIONS') return res.status(204).end();
+  next();
+});
 app.use(express.json());
 
 // public
