@@ -1,5 +1,19 @@
 {
+  "name": "skillswap",
+  "version": "1.0.0",
+  "private": true,
+  "description": "SkillSwap full-stack app (Vite client + Express API on Vercel)",
+  "scripts": {
+    "build": "npm --prefix client install && npm --prefix client run build",
+    "start": "node server/server.js"
+  },
   "dependencies": {
-    "mongoose": "^9.12.1"
+    "bcryptjs": "^3.0.3",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "firebase-admin": "^14.4.0",
+    "jsonwebtoken": "^9.0.3",
+    "mongoose": "^9.9.4"
   }
 }

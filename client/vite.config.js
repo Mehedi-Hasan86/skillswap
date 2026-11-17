@@ -9,5 +9,7 @@ export default defineConfig({
   server: {
     port: 3000,
     host: true,
+    // Lets local dev call /api without VITE_API_URL (mirrors Vercel behaviour).
+    proxy: { '/api': 'http://localhost:5001' },
   }
 })

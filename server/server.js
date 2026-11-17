@@ -43,7 +43,9 @@ app.use('/api', (req, res) => res.status(404).json({ error: 'Not found' }));
 
 const PORT = process.env.PORT || 5001;
 
-(async () => {
+// Initialization runs once per process (local dev or a warm serverless
+// instance). Exporting `ready` lets the Vercel function await it.
+const ready = (async () => {
   seedIfEmpty();
   await seedMemory(store, id);
   await connectDB();
@@ -72,5 +74,13 @@ const PORT = process.env.PORT || 5001;
   } else {
     console.log('Demo logins — admin@skillswap.local / admin123, rahim@student.local / student123');
   }
-  app.listen(PORT, () => console.log(`SkillSwap server running on ${PORT} [${dbConnected() ? 'mongodb' : 'in-memory'}]`));
 })();
+
+// Only start a HTTP listener when run directly (npm run dev / npm start).
+// On Vercel the app is imported by api/index.js as a serverless function.
+if (require.main === module) {
+  ready.then(() => app.listen(PORT, () => console.log(`SkillSwap server running on ${PORT} [${dbConnected() ? 'mongodb' : 'in-memory'}]`)));
+}
+
+app.ready = ready;
+module.exports = app;
