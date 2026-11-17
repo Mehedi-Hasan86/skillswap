@@ -103,7 +103,7 @@ cd server
 npm install
 npm run dev
 ```
-*The server boots on `http://localhost:5000` with pre-seeded demo users and skills.*
+*The server boots on `http://localhost:5001` with pre-seeded demo users and skills.*
 
 ### 2. Start Frontend Client
 Open a second terminal window:
