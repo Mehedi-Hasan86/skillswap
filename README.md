@@ -7,11 +7,14 @@
 [![Express](https://img.shields.io/badge/Express-v5-lightgrey.svg)](https://expressjs.com/)
 [![MongoDB](https://img.shields.io/badge/MongoDB-Mongoose-brightgreen.svg)](https://www.mongodb.com/)
 [![TailwindCSS](https://img.shields.io/badge/Tailwind-v4-38bdf8.svg)](https://tailwindcss.com/)
+[![Live Demo](https://img.shields.io/badge/Live-Demo-brightgreen.svg)](https://skillswap-rho-bice.vercel.app)
 [![License](https://img.shields.io/badge/License-ISC-yellow.svg)](LICENSE)
 
 *A peer-to-peer knowledge exchange platform where the currency is what you know.*
 
-[Features](#-features) • [Matching Engine](#-matching-algorithm) • [Tech Stack](#-tech-stack) • [Getting Started](#-getting-started) • [API Docs](#-api-overview) • [Demo Accounts](#-demo-accounts)
+**🚀 Live at [skillswap-rho-bice.vercel.app](https://skillswap-rho-bice.vercel.app)**
+
+[Features](#-features) • [Matching Engine](#-matching-algorithm) • [Tech Stack](#-tech-stack) • [Getting Started](#-getting-started) • [Live Deployment](#-live-deployment) • [API Docs](#-api-overview) • [Demo Accounts](#-demo-accounts)
 
 </div>
 
@@ -22,6 +25,30 @@
 **SkillSwap** is a full-stack MERN peer-to-peer learning platform designed for university campuses and learning communities. Instead of paying monetary fees or relying on commercial tutors, students swap skills directly: *I teach you JavaScript, you teach me UI Design.* 
 
 Built according to formal Software Engineering specifications (**CSE 3638 Software Engineering Lab**), SkillSwap features a deterministic **100-point rule-based matching engine**, a **Skill Credit economy**, secure **JWT authentication**, **Firebase Google Sign-In**, and an **Admin control center**.
+
+---
+
+## 🌐 Live Deployment
+
+**[👉 Open the live app](https://skillswap-rho-bice.vercel.app)**
+
+| | |
+| :--- | :--- |
+| **Production URL** | https://skillswap-rho-bice.vercel.app |
+| **Alternate URL** | https://skillswap-mehedi-hasan86s-projects.vercel.app |
+| **Platform** | [Vercel](https://vercel.com) (Hobby) — `mehedi-hasan86s-projects/skillswap` |
+| **Architecture** | Vite client (`client/dist`) + Express API served as a serverless function at `/api` (`api/index.js`), same-origin rewrites |
+| **Health check** | `GET https://skillswap-rho-bice.vercel.app/api/health` |
+
+The production build uses same-origin `/api` requests, so no CORS or backend URL configuration is needed. All runtime secrets (Firebase Admin key, JWT secret, Mongo URI, `VITE_FIREBASE_*` web config) are set as Vercel environment variables — none are committed to this repository.
+
+To redeploy manually from the repo root (Vercel CLI authenticated):
+
+```bash
+vercel --prod --yes
+```
+
+> **Automatic deploys on GitHub push** are not enabled yet. To enable, install the [Vercel GitHub App](https://github.com/apps/vercel/installations/new) on this repository, then run `vercel git connect https://github.com/Mehedi-Hasan86/skillswap.git`.
 
 ---
 
@@ -151,7 +178,7 @@ Email/password authentication works instantly out of the box. To enable **Google
 
    #### Troubleshooting Google Sign-In
    * **`auth/network-request-failed` / "Could not reach Google Sign-In":** The client retries once automatically; if it still fails, check your internet connection (Firebase Auth talks to `identitytoolkit.googleapis.com`). Email/password login keeps working offline. If you edited `client/.env`, **restart `npm run dev`** — Vite reads `VITE_*` values only at startup.
-   * **`auth/unauthorized-domain`:** Go to **Firebase Console → Authentication → Settings → Authorized domains** and add `localhost` and `127.0.0.1` (and the exact host/port you open the app on).
+   * **`auth/unauthorized-domain`:** Go to **Firebase Console → Authentication → Settings → Authorized domains** and add `localhost` and `127.0.0.1` for local development, plus the production hosts `skillswap-rho-bice.vercel.app` and `skillswap-mehedi-hasan86s-projects.vercel.app` (or any custom domain you add).
    * **"Google sign-in is unavailable on the server" (HTTP 503):** Check the `FIREBASE_*` values in `server/.env`. Keep `\n` escapes in `FIREBASE_PRIVATE_KEY` as-is — the server converts them to real newlines. `firebase-admin` v14+ is used (`getApps()` and `firebase-admin/auth`).
 
 ---
