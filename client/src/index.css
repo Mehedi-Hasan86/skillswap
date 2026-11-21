@@ -1,16 +1,41 @@
 @import "tailwindcss";
 
+/* ── SkillSwap warm-light token ramp ───────────────────────────
+   Paper + ink campus world. One neutral ramp, three text roles,
+   one accent (ember amber) used rarely. */
+
+@theme {
+  --color-page: #f7f4ee;        /* page background */
+  --color-surface: #fdfbf7;     /* card */
+  --color-raised: #efe9df;      /* active row, input */
+  --color-ink: #1f1b16;         /* primary text */
+  --color-ink-2: #5e554a;       /* secondary text */
+  --color-ink-3: #6e6558;       /* muted text / icons */
+  --color-hairline: rgba(31, 27, 22, 0.09);
+  --color-accent: #b45309;      /* ember amber */
+  --color-accent-deep: #92400e; /* accent as ink on light */
+  --color-positive: #16a34a;    /* semantic, toned */
+  --color-negative: #dc2626;    /* semantic, toned */
+}
+
 html {
   scroll-behavior: smooth;
 }
 
 body {
-  background: #020617;
-  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  background: var(--color-page);
+  color: var(--color-ink);
+  font-family: "Instrument Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* The one display face, for the hero headline only */
+.font-display {
+  font-family: "Instrument Serif", Georgia, "Times New Roman", serif;
 }
 
 ::selection {
-  background: rgba(168, 85, 247, 0.4);
+  background: rgba(180, 83, 9, 0.18);
 }
 
 /* slim scrollbars for dashboard lists */
@@ -22,6 +47,135 @@ body {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(148, 163, 184, 0.3);
+  background: rgba(31, 27, 22, 0.18);
   border-radius: 8px;
+}
+
+@layer components {
+  .card {
+    border: 1px solid var(--color-hairline);
+    background: var(--color-surface);
+    border-radius: 16px;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-weight: 500;
+    border-radius: 10px;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: background-color 0.16s, border-color 0.16s, color 0.16s, transform 0.16s;
+  }
+  .btn:active {
+    transform: scale(0.98);
+  }
+  .btn-primary {
+    background: var(--color-ink);
+    color: var(--color-surface);
+    padding: 0 20px;
+    height: 44px;
+  }
+  .btn-primary:hover {
+    background: #34302a;
+  }
+  .btn-secondary {
+    background: var(--color-raised);
+    color: var(--color-ink);
+    border-color: var(--color-hairline);
+    padding: 0 20px;
+    height: 44px;
+  }
+  .btn-secondary:hover {
+    background: #e8e0d3;
+  }
+  .btn-ghost {
+    color: var(--color-ink-2);
+    padding: 0 14px;
+    height: 40px;
+  }
+  .btn-ghost:hover {
+    color: var(--color-ink);
+    background: var(--color-raised);
+  }
+  .btn-sm {
+    height: 36px;
+    padding: 0 14px;
+    font-size: 14px;
+  }
+
+  .input {
+    width: 100%;
+    border: 1px solid var(--color-hairline);
+    background: var(--color-raised);
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 14px;
+    color: var(--color-ink);
+    outline: none;
+    transition: border-color 0.16s, box-shadow 0.16s;
+  }
+  .input::placeholder {
+    color: var(--color-ink-3);
+  }
+  .input:focus {
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 3px rgba(180, 83, 9, 0.12);
+  }
+
+  .label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--color-ink-2);
+    letter-spacing: 0.01em;
+  }
+
+  .kicker {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-accent-deep);
+  }
+
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--color-ink-2);
+    background: var(--color-raised);
+    border: 1px solid var(--color-hairline);
+    border-radius: 6px;
+    padding: 4px 10px;
+  }
+
+  .mono {
+    font-variant-numeric: tabular-nums;
+  }
+
+  .tab {
+    height: 40px;
+    padding: 0 16px;
+    border-radius: 10px;
+    border: 1px solid transparent;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--color-ink-2);
+    cursor: pointer;
+    transition: background-color 0.16s, color 0.16s, border-color 0.16s;
+  }
+  .tab:hover {
+    color: var(--color-ink);
+  }
+  .tab-active {
+    background: var(--color-raised);
+    color: var(--color-ink);
+    border-color: var(--color-hairline);
+  }
+
+  .swap-mark {
+    color: var(--color-accent);
+  }
 }

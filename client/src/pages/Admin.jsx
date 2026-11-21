@@ -40,50 +40,50 @@ export default function Admin() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-200">
+    <div className="min-h-screen bg-page text-ink">
       <Navbar />
-      <div className="mx-auto max-w-7xl px-4 py-8">
-        <h1 className="text-3xl font-black text-white">Admin control room 🛡️</h1>
-        <p className="mt-1 text-sm text-slate-400">Users · skills · swaps · sessions · reports</p>
-        {msg && <p className="mt-4 rounded-xl border border-indigo-400/30 bg-indigo-500/10 px-4 py-2.5 text-sm font-semibold text-indigo-200">{msg}</p>}
+      <div className="mx-auto max-w-7xl px-6 py-8">
+        <h1 className="text-2xl font-medium tracking-tight text-ink">Admin · Overview</h1>
+        <p className="mt-1 text-sm text-ink-2">Users, skills, swaps, sessions, reports</p>
+        {msg && <p className="mt-4 rounded-lg border border-accent/30 bg-accent/10 px-4 py-2.5 text-sm font-medium text-accent-deep">{msg}</p>}
 
-        <div className="mt-6 flex flex-wrap gap-2">
+        <div className="mt-6 flex flex-wrap gap-1">
           {[['overview', 'Overview'], ['users', `Users (${users.length})`], ['skills', `Skills (${skills.length})`], ['reports', `Reports (${reports.filter((r) => r.status === 'pending').length} pending)`]].map(([id, l]) => (
-            <button key={id} onClick={() => setTab(id)} className={`rounded-xl px-4 py-2.5 text-sm font-bold ${tab === id ? 'bg-gradient-to-r from-indigo-500 to-fuchsia-500 text-white' : 'bg-white/5 text-slate-300 hover:bg-white/10'}`}>{l}</button>
+            <button key={id} onClick={() => setTab(id)} className={`tab ${tab === id ? 'tab-active' : ''}`}>{l}</button>
           ))}
         </div>
 
         {tab === 'overview' && stats && (
           <div className="mt-6 grid gap-4 md:grid-cols-3 lg:grid-cols-6">
             {[
-              ['👥 Users', stats.totalUsers],
-              ['⏳ Pending req.', stats.pendingRequests],
-              ['🔁 Active swaps', stats.activeSwaps],
-              ['✅ Completed', stats.completedSessions],
-              ['🚩 Reports', stats.pendingReports],
-              ['🎯 Skills', stats.totalSkills],
+              ['Users', stats.totalUsers],
+              ['Pending req.', stats.pendingRequests],
+              ['Active swaps', stats.activeSwaps],
+              ['Completed', stats.completedSessions],
+              ['Reports', stats.pendingReports],
+              ['Skills', stats.totalSkills],
             ].map(([t, v]) => (
-              <Card key={t}><p className="text-xs font-bold text-slate-400">{t}</p><p className="mt-1 text-3xl font-black text-white">{v}</p></Card>
+              <Card key={t}><p className="text-xs text-ink-3">{t}</p><p className="mono mt-1 text-3xl font-medium text-ink">{v}</p></Card>
             ))}
             <Card className="md:col-span-3">
-              <p className="font-extrabold text-white">Most requested skills</p>
+              <p className="font-medium text-ink">Most requested skills</p>
               <div className="mt-3 space-y-2">
                 {(stats.popularSkills || []).map((p) => (
-                  <div key={p._id} className="flex items-center justify-between rounded-xl bg-white/5 px-4 py-2.5 text-sm">
-                    <span className="font-bold text-white">{p._id}</span>
-                    <span className="rounded-full bg-fuchsia-500/20 px-2.5 py-0.5 text-xs font-extrabold text-fuchsia-300">{p.count} requests</span>
+                  <div key={p._id} className="flex items-center justify-between rounded-lg bg-raised px-4 py-2.5 text-sm">
+                    <span className="font-medium text-ink">{p._id}</span>
+                    <span className="mono text-sm text-accent-deep">{p.count} requests</span>
                   </div>
                 ))}
-                {(stats.popularSkills || []).length === 0 && <p className="text-sm text-slate-500">No requests yet.</p>}
+                {(stats.popularSkills || []).length === 0 && <p className="text-sm text-ink-3">No requests yet.</p>}
               </div>
             </Card>
             <Card className="md:col-span-3">
-              <p className="font-extrabold text-white">Credit balances</p>
+              <p className="font-medium text-ink">Credit balances</p>
               <div className="mt-3 max-h-56 space-y-1.5 overflow-auto text-sm">
                 {users.map((u) => (
-                  <div key={u._id} className="flex justify-between rounded-lg bg-white/5 px-3 py-2">
-                    <span>{u.name} <span className="text-slate-500">({u.role})</span></span>
-                    <span className="font-extrabold text-amber-300">✦ {u.credits}</span>
+                  <div key={u._id} className="flex justify-between rounded-lg bg-raised px-3 py-2">
+                    <span className="text-ink-2">{u.name} <span className="text-ink-3">({u.role})</span></span>
+                    <span className="mono font-medium text-accent-deep">{u.credits}</span>
                   </div>
                 ))}
               </div>
@@ -95,19 +95,19 @@ export default function Admin() {
           <Card className="mt-6">
             <div className="overflow-x-auto">
               <table className="w-full text-left text-sm">
-                <thead><tr className="text-xs uppercase tracking-wider text-slate-500"><th className="py-2">User</th><th>Teach / Learn</th><th>Rating</th><th>Credits</th><th>Status</th><th></th></tr></thead>
+                <thead><tr className="text-xs font-medium text-ink-3"><th className="py-2">User</th><th>Teach / Learn</th><th>Rating</th><th>Credits</th><th>Status</th><th></th></tr></thead>
                 <tbody>
                   {users.map((u) => (
-                    <tr key={u._id} className="border-t border-white/5">
-                      <td className="py-3 pr-4"><p className="font-bold text-white">{u.name}</p><p className="text-xs text-slate-500">{u.email} · {u.role}</p></td>
-                      <td className="pr-4 text-xs text-slate-400">{(u.teachSkills || []).length} teach · {(u.learnSkills || []).length} learn</td>
-                      <td className="pr-4">★ {u.avgRating || '–'} ({u.totalReviews || 0})</td>
-                      <td className="pr-4 font-bold text-amber-300">✦ {u.credits}</td>
-                      <td className="pr-4"><span className={`rounded-full px-2 py-0.5 text-xs font-bold ${u.status === 'active' ? 'bg-emerald-400/15 text-emerald-300' : 'bg-red-400/15 text-red-300'}`}>{u.status}</span></td>
+                    <tr key={u._id} className="border-t border-hairline">
+                      <td className="py-3 pr-4"><p className="font-medium text-ink">{u.name}</p><p className="text-xs text-ink-3">{u.email} · {u.role}</p></td>
+                      <td className="pr-4 text-xs text-ink-2">{(u.teachSkills || []).length} teach · {(u.learnSkills || []).length} learn</td>
+                      <td className="mono pr-4">{u.avgRating || '–'} ({u.totalReviews || 0})</td>
+                      <td className="mono pr-4 font-medium text-accent-deep">{u.credits}</td>
+                      <td className="pr-4"><span className={`mono rounded-md px-2 py-0.5 text-xs font-medium ${u.status === 'active' ? 'bg-positive/15 text-positive' : 'bg-negative/15 text-negative'}`}>{u.status}</span></td>
                       <td>{u.role !== 'admin' && (
                         u.status === 'active'
-                          ? <button onClick={() => act(api.put(`/admin/users/${u._id}`, { status: 'suspended' }), `${u.name} suspended`)} className="rounded-lg bg-red-500/20 px-3 py-1.5 text-xs font-bold text-red-300">Suspend</button>
-                          : <button onClick={() => act(api.put(`/admin/users/${u._id}`, { status: 'active' }), `${u.name} reactivated`)} className="rounded-lg bg-emerald-500/20 px-3 py-1.5 text-xs font-bold text-emerald-300">Activate</button>
+                          ? <button onClick={() => act(api.put(`/admin/users/${u._id}`, { status: 'suspended' }), `${u.name} suspended`)} className="btn btn-sm bg-negative/10 text-negative">Suspend</button>
+                          : <button onClick={() => act(api.put(`/admin/users/${u._id}`, { status: 'active' }), `${u.name} reactivated`)} className="btn btn-sm bg-positive/10 text-positive">Activate</button>
                       )}</td>
                     </tr>
                   ))}
@@ -120,19 +120,19 @@ export default function Admin() {
         {tab === 'skills' && (
           <div className="mt-6 grid gap-4 lg:grid-cols-3">
             <Card>
-              <p className="font-extrabold text-white">Add skill to master list</p>
-              <input value={skillForm.name} onChange={(e) => setSkillForm({ ...skillForm, name: e.target.value })} placeholder="e.g. Figma" className="mt-3 w-full rounded-lg border border-white/10 bg-slate-900 px-3 py-2.5 text-sm text-white" />
-              <input value={skillForm.category} onChange={(e) => setSkillForm({ ...skillForm, category: e.target.value })} placeholder="Category" className="mt-2 w-full rounded-lg border border-white/10 bg-slate-900 px-3 py-2.5 text-sm text-white" />
-              <input value={skillForm.description} onChange={(e) => setSkillForm({ ...skillForm, description: e.target.value })} placeholder="Short description" className="mt-2 w-full rounded-lg border border-white/10 bg-slate-900 px-3 py-2.5 text-sm text-white" />
-              <button onClick={() => act(api.post('/skills', skillForm).then(() => setSkillForm({ name: '', category: 'Programming', description: '' })), 'Skill added!')} className="mt-2 w-full rounded-xl bg-gradient-to-r from-indigo-500 to-fuchsia-500 py-2.5 text-sm font-bold text-white">Add skill</button>
+              <p className="font-medium text-ink">Add skill to master list</p>
+              <input value={skillForm.name} onChange={(e) => setSkillForm({ ...skillForm, name: e.target.value })} placeholder="e.g. Figma" className="input mt-3" />
+              <input value={skillForm.category} onChange={(e) => setSkillForm({ ...skillForm, category: e.target.value })} placeholder="Category" className="input mt-2" />
+              <input value={skillForm.description} onChange={(e) => setSkillForm({ ...skillForm, description: e.target.value })} placeholder="Short description" className="input mt-2" />
+              <button onClick={() => act(api.post('/skills', skillForm).then(() => setSkillForm({ name: '', category: 'Programming', description: '' })), 'Skill added')} className="btn btn-primary mt-2 w-full">Add skill</button>
             </Card>
             <Card className="lg:col-span-2">
-              <p className="font-extrabold text-white">Master skill list</p>
+              <p className="font-medium text-ink">Master skill list</p>
               <div className="mt-3 grid gap-2 sm:grid-cols-2">
                 {skills.map((s) => (
-                  <div key={s._id} className="flex items-center justify-between rounded-xl bg-white/5 px-3 py-2.5 text-sm">
-                    <div><p className="font-bold text-white">{s.name}</p><p className="text-xs text-slate-500">{s.category}</p></div>
-                    <button onClick={() => act(api.delete(`/skills/${s._id}`), `Deleted ${s.name}`)} className="rounded-lg bg-white/10 px-2.5 py-1.5 text-xs font-bold text-red-300">Delete</button>
+                  <div key={s._id} className="flex items-center justify-between rounded-xl bg-raised px-3 py-2.5 text-sm">
+                    <div><p className="font-medium text-ink">{s.name}</p><p className="text-xs text-ink-3">{s.category}</p></div>
+                    <button onClick={() => act(api.delete(`/skills/${s._id}`), `Deleted ${s.name}`)} className="btn btn-sm bg-negative/10 text-negative">Delete</button>
                   </div>
                 ))}
               </div>
@@ -142,22 +142,22 @@ export default function Admin() {
 
         {tab === 'reports' && (
           <Card className="mt-6">
-            <p className="font-extrabold text-white">Reports queue</p>
+            <p className="font-medium text-ink">Reports queue</p>
             <div className="mt-3 space-y-2">
               {reports.map((r) => (
-                <div key={r._id} className="rounded-xl bg-white/5 p-4 text-sm">
-                  <p className="font-bold text-white">{r.reason} <span className={`ml-2 rounded-full px-2 py-0.5 text-xs ${r.status === 'pending' ? 'bg-amber-400/20 text-amber-300' : 'bg-emerald-400/20 text-emerald-300'}`}>{r.status}</span></p>
-                  <p className="mt-1 text-slate-400">Reporter: {r.reporter?.name || r.reporter} → Reported: {r.reportedUser?.name || r.reportedUser}</p>
-                  {r.details && <p className="mt-1 text-slate-500">“{r.details}”</p>}
+                <div key={r._id} className="rounded-xl bg-raised p-4 text-sm">
+                  <p className="font-medium text-ink">{r.reason} <span className={`mono ml-2 rounded-md px-2 py-0.5 text-xs ${r.status === 'pending' ? 'bg-amber-500/15 text-amber-700' : 'bg-positive/15 text-positive'}`}>{r.status}</span></p>
+                  <p className="mt-1 text-ink-2">Reporter: {r.reporter?.name || r.reporter} → Reported: {r.reportedUser?.name || r.reportedUser}</p>
+                  {r.details && <p className="mt-1 text-ink-3">{r.details}</p>}
                   {r.status === 'pending' && (
                     <div className="mt-2 flex gap-2">
-                      <button onClick={() => act(api.put(`/reports/${r._id}`, { status: 'resolved', actionTaken: 'Reviewed — warning issued' }), 'Report resolved')} className="rounded-lg bg-emerald-500 px-3 py-1.5 text-xs font-bold text-white">Resolve</button>
-                      <button onClick={() => act(api.put(`/reports/${r._id}`, { status: 'dismissed', actionTaken: 'No violation found' }), 'Report dismissed')} className="rounded-lg bg-white/10 px-3 py-1.5 text-xs font-bold">Dismiss</button>
+                      <button onClick={() => act(api.put(`/reports/${r._id}`, { status: 'resolved', actionTaken: 'Reviewed — warning issued' }), 'Report resolved')} className="btn btn-sm bg-positive text-surface">Resolve</button>
+                      <button onClick={() => act(api.put(`/reports/${r._id}`, { status: 'dismissed', actionTaken: 'No violation found' }), 'Report dismissed')} className="btn btn-sm bg-raised text-ink">Dismiss</button>
                     </div>
                   )}
                 </div>
               ))}
-              {reports.length === 0 && <p className="text-sm text-slate-500">No reports. 🎉</p>}
+              {reports.length === 0 && <p className="text-sm text-ink-3">No reports.</p>}
             </div>
           </Card>
         )}

@@ -1,51 +1,46 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { SwapMark } from './ui';
 
 export default function Navbar() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
   return (
-    <nav className="sticky top-0 z-50 border-b border-white/10 bg-slate-950/80 backdrop-blur-xl">
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
+    <nav className="sticky top-0 z-50 border-b border-hairline bg-page/90 backdrop-blur">
+      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
         <Link to="/" className="flex items-center gap-2.5">
-          <span className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-indigo-500 via-violet-500 to-fuchsia-500 text-lg font-black text-white shadow-lg shadow-indigo-500/30">
-            ⇄
-          </span>
-          <span className="text-lg font-extrabold tracking-tight text-white">
-            Skill<span className="bg-gradient-to-r from-indigo-400 to-fuchsia-400 bg-clip-text text-transparent">Swap</span>
+          <SwapMark className="h-6 w-6" />
+          <span className="text-lg font-semibold tracking-tight text-ink">
+            SkillSwap
           </span>
         </Link>
-        <div className="hidden items-center gap-6 text-sm font-medium text-slate-300 md:flex">
-          <a href="/#how" className="transition hover:text-white">How it works</a>
-          <a href="/#matching" className="transition hover:text-white">Matching</a>
-          <a href="/#features" className="transition hover:text-white">Features</a>
-          <a href="/#credits" className="transition hover:text-white">Credits</a>
+        <div className="hidden items-center gap-1 text-sm font-medium text-ink-2 md:flex">
+          <a href="/#how" className="btn btn-ghost">How it works</a>
+          <a href="/#matching" className="btn btn-ghost">Matching</a>
+          <a href="/#features" className="btn btn-ghost">Features</a>
+          <a href="/#credits" className="btn btn-ghost">Credits</a>
         </div>
         <div className="flex items-center gap-2">
           {!user ? (
             <>
-              <Link to="/login" className="rounded-lg px-4 py-2 text-sm font-semibold text-slate-200 transition hover:bg-white/10 hover:text-white">
-                Log in
-              </Link>
-              <Link to="/register" className="rounded-lg bg-gradient-to-r from-indigo-500 to-fuchsia-500 px-4 py-2 text-sm font-bold text-white shadow-lg shadow-indigo-500/25 transition hover:opacity-90">
-                Join free
-              </Link>
+              <Link to="/login" className="btn btn-ghost">Log in</Link>
+              <Link to="/register" className="btn btn-primary">Join free</Link>
             </>
           ) : (
             <>
               <Link
                 to={user.role === 'admin' ? '/admin' : '/dashboard'}
-                className="rounded-lg bg-white/10 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/20"
+                className="btn btn-secondary"
               >
                 {user.role === 'admin' ? 'Admin panel' : 'Dashboard'}
               </Link>
-              <span className="hidden items-center gap-1.5 rounded-full bg-amber-400/15 px-3 py-1.5 text-xs font-bold text-amber-300 sm:flex">
-                ✦ {user.credits ?? 0} credits
+              <span className="mono hidden items-center gap-1 text-sm font-medium text-ink-2 sm:flex">
+                {user.credits ?? 0} credits
               </span>
               <button
                 onClick={() => { logout(); navigate('/'); }}
-                className="rounded-lg px-3 py-2 text-sm font-semibold text-slate-400 transition hover:text-white"
+                className="btn btn-ghost"
               >
                 Logout
               </button>

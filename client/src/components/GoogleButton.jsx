@@ -28,7 +28,7 @@ export default function GoogleButton({ label = 'Continue with Google' }) {
       <button
         onClick={go}
         disabled={busy}
-        className="flex w-full items-center justify-center gap-2.5 rounded-xl border border-white/15 bg-white py-3 font-bold text-slate-900 transition hover:bg-slate-200 disabled:opacity-60"
+        className="btn btn-secondary w-full"
       >
         <svg width="18" height="18" viewBox="0 0 48 48">
           <path fill="#FFC107" d="M43.6 20.1H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.2 8 3l5.7-5.7C34.3 6.1 29.4 4 24 4 13 4 4 13 4 24s9 20 20 20 20-9 20-20c0-1.3-.1-2.7-.4-3.9z" />
@@ -38,10 +38,10 @@ export default function GoogleButton({ label = 'Continue with Google' }) {
         </svg>
         {busy ? 'Connecting…' : label}
       </button>
-      {err && <p className="mt-2 rounded-lg bg-red-500/15 px-3 py-2 text-sm font-semibold text-red-300">{err}</p>}
+      {err && <p className="mt-2 rounded-lg bg-negative/10 px-3 py-2 text-sm font-medium text-negative">{err}</p>}
       {!isFirebaseConfigured && (
-        <p className="mt-2 text-center text-xs text-slate-500">
-          Google button needs <code className="text-slate-400">VITE_FIREBASE_*</code> keys in <code className="text-slate-400">client/.env</code> — email login works meanwhile.
+        <p className="mt-2 text-center text-xs text-ink-3">
+          Google button needs <code className="text-ink-2">VITE_FIREBASE_*</code> keys in <code className="text-ink-2">client/.env</code> — email login works meanwhile.
         </p>
       )}
     </div>

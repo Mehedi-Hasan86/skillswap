@@ -5,7 +5,15 @@ const api = axios.create({
   // serverless function. VITE_API_URL is only a local-dev convenience:
   // a stale value in client/.env must never be baked into a production build
   // (Vercel CLI can upload that file, which otherwise breaks every API call).
-  baseURL: import.meta.env.PROD ? '/api' : (import.meta.env.VITE_API_URL || '/api'),
+  //
+  // In local dev, prefer the Vite proxy (/api → the Express server) over a
+  // baked VITE_API_URL when the two disagree, so a stale port in client/.env
+  // can't silently break login with "Network Error".
+  baseURL: import.meta.env.PROD
+    ? '/api'
+    : (import.meta.env.VITE_API_URL && !import.meta.env.VITE_API_URL.startsWith('http://localhost:5001'))
+      ? import.meta.env.VITE_API_URL
+      : '/api',
 });
 
 api.interceptors.request.use((config) => {
